@@ -1,0 +1,18 @@
+FROM apache/airflow:2.7.3-python3.10
+
+# Установка необходимых системных зависимостей
+RUN apt-get update && apt-get install -y \
+    default-libmysqlclient-dev \
+    build-essential \
+    pkg-config \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Создание виртуального окружения и установка зависимостей
+ENV NIXPACKS_PATH=/opt/venv/bin:$NIXPACKS_PATH
+COPY . /app/.
+
+RUN --mount=type=cache,id=s/88ed891d-b19f-45ca-a2d2-4e605f48793e-/root/cache/pip,target=/root/.cache/pip \
+    python -m venv --copies /opt/venv && \
+    /opt/venv/bin/activate && \
+    pip install -r /app/requirements.txt
