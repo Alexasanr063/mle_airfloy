@@ -8,11 +8,18 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Создание виртуального окружения и установка зависимостей
-ENV NIXPACKS_PATH=/opt/venv/bin:$NIXPACKS_PATH
-COPY . /app/.
+# Копирование файлов приложения
+COPY . /app/
 
-RUN --mount=type=cache,id=s/88ed891d-b19f-45ca-a2d2-4e605f48793e-/root/cache/pip,target=/root/.cache/pip \
-    python -m venv --copies /opt/venv && \
-    /opt/venv/bin/activate && \
-    pip install -r /app/requirements.txt
+# Установка виртуального окружения и зависимостей
+RUN python -m venv /opt/venv && \
+    /opt/venv/bin/pip install -r /app/requirements.txt
+
+# Установка переменной окружения PATH для доступа к pip и python
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Укажите рабочую директорию (опционально)
+WORKDIR /app
+
+# Команда запуска (опционально, измените на нужную)
+CMD ["airflow", "standalone"]
